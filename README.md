@@ -237,58 +237,9 @@ Intelligent Contract: WorldOracleHuntFactory
 
 ---
 
-## 10. How to Submit on the GenLayer Portal
-
-The `portal.genlayer.foundation/#/submit-contribution` portal has multiple categories. The **best-fit** category for this concept:
-
-### 🎯 Primary option — Mission "Mini-games for GenLayer's Community" (Ongoing)
-
-This mission explicitly invites multiplayer game submissions built on Intelligent Contracts + Optimistic Democracy. The brief is almost a 1:1 match for World Oracle Hunt.
-
-**Submission steps:**
-1. Open https://portal.genlayer.foundation/#/builders/contributions
-2. Connect Wallet (top right button).
-3. On the *"Mini-games for GenLayer's Community"* card → click **Submit →**.
-4. Fill out the form:
-   - **Description** → paste the contents of `portal-description-en.txt` (see attachment).
-   - **Evidence URLs**:
-     - Public link to the full concept (Medium / Mirror / public Notion / GitHub README) — at least 1 required.
-     - Optional but very helpful: a demo video (Loom / YouTube ≤ 3 minutes).
-     - Repo link if an MVP exists — optional.
-   - **Date**: today's date.
-5. Solve the reCAPTCHA → Submit. Initial status: **Pending Review** by a steward.
-
-**Tips to score higher points:**
-- Before submitting, cross-post the concept to the GenLayer Discord `#dev-chat` channel (and reference it in the mission topic) to get early feedback and visibility.
-- Include at least one UI mockup (Figma / Excalidraw) — clear evidence of effort.
-- Restate the four mission requirements (multiplayer, 5–15 min, replayable, leaderboard) explicitly in the description so reviewers can tick them off quickly.
-
-### Parallel option — Open call "Projects & Milestones" (20–4000 pts)
-After a minimal MVP exists (deployed contract + basic frontend), submit again as a milestone. The point range is significantly higher.
-
-### Complementary option — "Educational Content" (20–600 pts)
-If you also produce a tutorial / video / blog post explaining how to build World Oracle Hunt step-by-step, submit it separately under this category.
-
-### Note on Hackathon Bradbury
-DoraHacks registration is **closed**. The "Hackathon: GenLayer Testnet Bradbury" mission card on the portal still says *Ongoing* but only accepts entries that were already registered on DoraHacks during the hackathon window.
-
----
-
-## 11. Submission Checklist
-
-- [ ] GenLayer Foundation profile complete (display name + email)
-- [ ] Correct contribution type selected
-- [ ] Contribution date filled in (actual date, not the future)
-- [ ] Description ≤ 1000 characters — reuse the elevator pitch from §1
-- [ ] Evidence URLs (minimum one, ideally 2–3): article / repo / explorer link
-- [ ] reCAPTCHA solved
-- [ ] Submit → status **Pending Review** → wait for steward review
-
----
-
 ## 12. License & Attribution
 
-Concept by **Rexa**, documented for the GenLayer community. Free to use / fork with attribution.
+Concept by **riyannode**, documented for the GenLayer community. Free to use / fork with attribution.
 
 This document is built on top of the official documentation:
 - [GenLayer Builder Program](https://portal.genlayer.foundation/)
