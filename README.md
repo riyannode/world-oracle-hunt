@@ -237,7 +237,7 @@ Intelligent Contract: WorldOracleHuntFactory
 
 ---
 
-## 12. License & Attribution
+## 10. License & Attribution
 
 Concept by **riyannode**, documented for the GenLayer community. Free to use / fork with attribution.
 
