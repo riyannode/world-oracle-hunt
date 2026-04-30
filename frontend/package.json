@@ -1,0 +1,16 @@
+{
+  "name": "woh-frontend",
+  "version": "1.0.0",
+  "private": true,
+  "description": "World Oracle Hunt — frontend (static HTML + bundled genlayer-js)",
+  "scripts": {
+    "build": "esbuild genlayer-entry.js --bundle --format=iife --target=es2020 --outfile=public/genlayer.bundle.js --minify",
+    "serve": "python3 -m http.server 8000 --directory public"
+  },
+  "dependencies": {
+    "genlayer-js": "^1.1.7"
+  },
+  "devDependencies": {
+    "esbuild": "^0.28.0"
+  }
+}
