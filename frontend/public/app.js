@@ -94,7 +94,7 @@ async function refreshState() {
   } catch (err) {
     console.error("get_predictions failed:", err);
     $("predictionsBody").innerHTML =
-      `<div class="text-red-400">Failed to load: ${escapeHtml(String(err.message || err))}</div>`;
+      `<div class="px-4 py-3 rounded-2xl bg-red-100 border-[2.5px] border-ink text-red-800 font-semibold">Failed to load: ${escapeHtml(String(err.message || err))}</div>`;
   }
 }
 
@@ -140,8 +140,8 @@ function renderContractState(s) {
 
   const sources = Array.isArray(s.sources) ? s.sources : [];
   $("sourcesList").innerHTML = sources
-    .map((u) => `<a class="text-accent2 hover:underline break-all" target="_blank" href="${u}">${escapeHtml(u)}</a>`)
-    .join('<span class="text-white/30 mx-2">·</span>');
+    .map((u) => `<a class="link break-all" target="_blank" href="${u}">${escapeHtml(u)}</a>`)
+    .join('<span class="text-ink/30 mx-2">·</span>');
 
   // Show settle/lock section if phase ≠ SETTLED
   const showOps = s.phase === "OPEN" || s.phase === "LOCKED";
@@ -153,7 +153,7 @@ function renderContractState(s) {
 function renderPredictions(preds) {
   if (preds.length === 0) {
     $("predictionsBody").innerHTML =
-      '<div class="text-white/40 italic">No predictions yet — be the first.</div>';
+      '<div class="text-center py-10"><div class="text-6xl mb-2 animate-float">🎯</div><div class="text-ink/60 font-semibold">No predictions yet — be the first!</div></div>';
     return;
   }
   $("predictionsBody").innerHTML = preds
@@ -163,12 +163,17 @@ function renderPredictions(preds) {
       const answer = escapeHtml(String(p.answer ?? ""));
       const ts = p.timestamp ? new Date(Number(p.timestamp) * 1000).toLocaleString() : "";
       return `
-        <div class="flex items-center justify-between rounded-lg bg-white/3 border border-white/5 px-3 py-2">
-          <div class="flex items-center gap-3">
-            <div class="text-xs font-mono text-white/50">${player}</div>
-            <div class="font-mono text-base">${answer}</div>
+        <div class="pred-row flex items-center justify-between gap-3 px-4 py-3">
+          <div class="flex items-center gap-3 min-w-0">
+            <div class="w-9 h-9 flex items-center justify-center rounded-full bg-grape text-white font-bold text-xs border-[2.5px] border-ink shrink-0">
+              ${player.slice(2, 4).toUpperCase()}
+            </div>
+            <div class="min-w-0">
+              <div class="text-xs font-mono text-ink/60 truncate">${player}</div>
+              <div class="font-bold text-lg num">${answer}</div>
+            </div>
           </div>
-          <div class="text-[10px] text-white/40 num">${ts}</div>
+          <div class="text-[11px] text-ink/50 num text-right shrink-0">${ts}</div>
         </div>`;
     })
     .join("");
@@ -228,17 +233,17 @@ function updateWalletUI() {
   if (state.wallet && state.chainOk) {
     $("connectBtn").textContent = fmt.shortAddr(state.wallet);
     $("netPill").innerHTML = '<span class="pulse-dot"></span>Bradbury';
-    $("netPill").className = "pill bg-emerald-500/15 text-emerald-300";
+    $("netPill").className = "pill phase-OPEN";
     $("predictBtn").disabled = false;
     $("predictBtn").textContent = "Submit prediction";
   } else if (state.wallet) {
     $("connectBtn").textContent = fmt.shortAddr(state.wallet);
     $("netPill").innerHTML = '<span class="pulse-dot"></span>Wrong network';
-    $("netPill").className = "pill bg-red-500/15 text-red-300";
+    $("netPill").className = "pill phase-ANOMALY";
   } else {
     $("connectBtn").textContent = "Connect wallet";
     $("netPill").innerHTML = '<span class="pulse-dot"></span>Disconnected';
-    $("netPill").className = "pill bg-white/5 text-white/60";
+    $("netPill").className = "pill phase-loading";
   }
 }
 
@@ -258,14 +263,14 @@ async function submitPrediction(answer) {
       value: 0n,
     });
     setTxStatus(
-      `Submitted! <a class="text-accent2 hover:underline" target="_blank" href="${CONFIG.explorer}/tx/${txHash}">${fmt.shortAddr(
+      `Submitted! <a class="link" target="_blank" href="${CONFIG.explorer}/tx/${txHash}">${fmt.shortAddr(
         txHash,
       )}</a> — waiting for ACCEPTED…`,
       "info",
     );
     await waitForTx(client, txHash);
     setTxStatus(
-      `Confirmed: <a class="text-accent2 hover:underline" target="_blank" href="${CONFIG.explorer}/tx/${txHash}">${fmt.shortAddr(
+      `Confirmed: <a class="link" target="_blank" href="${CONFIG.explorer}/tx/${txHash}">${fmt.shortAddr(
         txHash,
       )}</a>`,
       "success",
@@ -292,7 +297,7 @@ async function callWriteMethod(method) {
       value: 0n,
     });
     setTxStatus(
-      `Submitted ${method}() → <a class="text-accent2 hover:underline" target="_blank" href="${CONFIG.explorer}/tx/${txHash}">${fmt.shortAddr(
+      `Submitted ${method}() → <a class="link" target="_blank" href="${CONFIG.explorer}/tx/${txHash}">${fmt.shortAddr(
         txHash,
       )}</a> — waiting…`,
       "info",
@@ -323,10 +328,10 @@ function setTxStatus(html, kind) {
   const el = $("txStatus");
   el.classList.remove("hidden");
   el.innerHTML = html;
-  el.className = "mt-4 rounded-lg px-3 py-2 text-xs ";
-  if (kind === "error") el.className += "bg-red-500/15 border border-red-500/30 text-red-300";
-  else if (kind === "success") el.className += "bg-emerald-500/15 border border-emerald-500/30 text-emerald-200";
-  else el.className += "bg-white/5 border border-white/10 text-white/80";
+  el.className = "mt-4 px-4 py-3 text-sm rounded-2xl border-[2.5px] border-ink font-medium ";
+  if (kind === "error") el.className += "bg-red-100 text-red-800";
+  else if (kind === "success") el.className += "bg-green-100 text-green-800";
+  else el.className += "bg-yellow-50 text-ink";
 }
 
 function escapeHtml(s) {
