@@ -1,0 +1,271 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>World Oracle Hunt — predict the world before the world reports it</title>
+    <meta
+      name="description"
+      content="A real-world data prediction game powered by GenLayer Intelligent Contracts. Settlement runs autonomously: validator LLMs fetch live web data, derive a canonical answer via the Equivalence Principle, and pay out the closest-to-the-pin winner."
+    />
+    <link rel="preconnect" href="https://rpc-bradbury.genlayer.com" />
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🔮%3C/text%3E%3C/svg%3E"
+    />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              accent: "#7c3aed",
+              accent2: "#22d3ee",
+              ink: "#0b0b14",
+              ink2: "#13131f",
+            },
+            fontFamily: {
+              mono: ["ui-monospace", "SFMono-Regular", "Menlo", "monospace"],
+              display: ['"Space Grotesk"', "ui-sans-serif", "system-ui"],
+            },
+          },
+        },
+      };
+    </script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        background:
+          radial-gradient(60% 40% at 30% 0%, rgba(124, 58, 237, 0.18) 0%, transparent 70%),
+          radial-gradient(50% 35% at 80% 0%, rgba(34, 211, 238, 0.14) 0%, transparent 70%),
+          #0b0b14;
+        min-height: 100dvh;
+        color: #e7e7f2;
+      }
+      .glass {
+        background: rgba(19, 19, 31, 0.7);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        backdrop-filter: blur(8px);
+      }
+      .pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        padding: 0.25rem 0.7rem;
+        border-radius: 999px;
+        font-size: 0.7rem;
+        font-weight: 600;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+      }
+      .phase-OPEN {
+        background: rgba(34, 197, 94, 0.15);
+        color: #4ade80;
+      }
+      .phase-LOCKED {
+        background: rgba(234, 179, 8, 0.15);
+        color: #facc15;
+      }
+      .phase-SETTLED {
+        background: rgba(124, 58, 237, 0.18);
+        color: #c4b5fd;
+      }
+      .phase-ANOMALY {
+        background: rgba(239, 68, 68, 0.18);
+        color: #fca5a5;
+      }
+      .pulse-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 999px;
+        background: currentColor;
+        animation: pulse 1.6s ease-in-out infinite;
+      }
+      @keyframes pulse {
+        0%, 100% { opacity: 0.4; transform: scale(0.9); }
+        50% { opacity: 1; transform: scale(1.1); }
+      }
+      .num {
+        font-variant-numeric: tabular-nums;
+      }
+    </style>
+  </head>
+  <body class="font-display antialiased">
+    <header class="max-w-6xl mx-auto px-4 sm:px-6 pt-8 sm:pt-12 pb-4 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="text-3xl">🔮</div>
+        <div>
+          <div class="text-xs text-white/50 uppercase tracking-widest">GenLayer · Testnet Bradbury</div>
+          <div class="text-xl font-bold tracking-tight">World Oracle Hunt</div>
+        </div>
+      </div>
+      <div class="flex items-center gap-2">
+        <span id="netPill" class="pill bg-white/5 text-white/60">
+          <span class="pulse-dot"></span>
+          checking…
+        </span>
+        <button
+          id="connectBtn"
+          class="hidden sm:inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-accent hover:bg-accent/90 text-white text-sm font-semibold transition"
+        >
+          Connect wallet
+        </button>
+      </div>
+    </header>
+
+    <main class="max-w-6xl mx-auto px-4 sm:px-6 pb-16">
+      <!-- Hero / Question -->
+      <section class="glass rounded-2xl p-5 sm:p-8 mt-2 mb-6">
+        <div class="flex items-start justify-between gap-4 flex-wrap">
+          <div class="space-y-2">
+            <div class="flex items-center gap-2 text-xs text-white/50 uppercase tracking-widest">
+              <span>Question</span>
+              <span class="text-white/30">·</span>
+              <span id="questionFormat">format: —</span>
+            </div>
+            <h1 id="questionText" class="text-xl sm:text-3xl font-bold leading-snug max-w-3xl">
+              Loading question from contract…
+            </h1>
+          </div>
+          <div class="text-right space-y-1.5 min-w-[160px]">
+            <div id="phasePill" class="pill phase-OPEN ml-auto">
+              <span class="pulse-dot"></span>
+              <span id="phaseText">…</span>
+            </div>
+            <div class="text-xs text-white/40">
+              Settlement <span id="settlementRel" class="num text-white/70">—</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-5 grid sm:grid-cols-3 gap-3">
+          <div class="rounded-xl bg-white/5 border border-white/5 px-4 py-3">
+            <div class="text-[10px] uppercase tracking-widest text-white/40">Predictions</div>
+            <div id="predCount" class="text-2xl font-bold num">—</div>
+          </div>
+          <div class="rounded-xl bg-white/5 border border-white/5 px-4 py-3">
+            <div class="text-[10px] uppercase tracking-widest text-white/40">Canonical answer</div>
+            <div id="canonicalAnswer" class="text-2xl font-bold num">—</div>
+          </div>
+          <div class="rounded-xl bg-white/5 border border-white/5 px-4 py-3">
+            <div class="text-[10px] uppercase tracking-widest text-white/40">Winner</div>
+            <div id="winnerAddr" class="text-sm font-semibold num truncate">—</div>
+          </div>
+        </div>
+
+        <details class="mt-4 text-sm">
+          <summary class="cursor-pointer text-white/60 hover:text-white/90">Sources & contract address</summary>
+          <div class="mt-3 space-y-1 text-white/70">
+            <div>
+              <span class="text-white/40">Contract:</span>
+              <a
+                id="contractLink"
+                target="_blank"
+                class="font-mono text-accent2 hover:underline break-all"
+              ></a>
+            </div>
+            <div>
+              <span class="text-white/40">Sources:</span>
+              <span id="sourcesList"></span>
+            </div>
+          </div>
+        </details>
+      </section>
+
+      <!-- Predict & Predictions -->
+      <section class="grid lg:grid-cols-3 gap-6">
+        <div class="glass rounded-2xl p-5 sm:p-6 lg:col-span-1">
+          <h2 class="text-sm uppercase tracking-widest text-white/40">Submit your prediction</h2>
+          <p class="text-xs text-white/50 mt-1 mb-4">
+            Closest to the canonical answer wins. One prediction per address (your latest replaces previous).
+          </p>
+          <form id="predictForm" class="space-y-3">
+            <input
+              id="answerInput"
+              type="text"
+              placeholder="e.g. 99000.50"
+              autocomplete="off"
+              class="w-full px-3 py-2.5 rounded-lg bg-white/5 border border-white/10 focus:border-accent focus:outline-none text-base num"
+            />
+            <button
+              type="submit"
+              id="predictBtn"
+              class="w-full px-3 py-2.5 rounded-lg bg-accent hover:bg-accent/90 text-white font-semibold transition disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Connect wallet first
+            </button>
+          </form>
+
+          <div id="txStatus" class="hidden mt-4 rounded-lg bg-white/5 border border-white/10 px-3 py-2 text-xs"></div>
+
+          <div class="mt-5 pt-4 border-t border-white/5 space-y-2 text-xs text-white/50">
+            <div class="flex items-center gap-2">
+              <span>🪙</span>
+              <span>Need testnet GEN? <a class="text-accent2 hover:underline" target="_blank" href="https://testnet-faucet.genlayer.foundation/">Faucet</a></span>
+            </div>
+            <div class="flex items-center gap-2">
+              <span>🌐</span>
+              <span>Chain ID 4221 (auto-added on connect)</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="glass rounded-2xl p-5 sm:p-6 lg:col-span-2">
+          <div class="flex items-center justify-between">
+            <h2 class="text-sm uppercase tracking-widest text-white/40">Predictions</h2>
+            <button
+              id="refreshBtn"
+              class="text-xs text-white/50 hover:text-white px-2 py-1 rounded border border-white/10"
+            >
+              ↻ refresh
+            </button>
+          </div>
+          <div id="predictionsBody" class="mt-4 space-y-2 text-sm">
+            <div class="text-white/40 italic">Loading…</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Settle controls -->
+      <section class="glass rounded-2xl p-5 sm:p-6 mt-6 hidden" id="settleSection">
+        <div class="flex items-center justify-between flex-wrap gap-3">
+          <div>
+            <h2 class="text-sm uppercase tracking-widest text-white/40">Operator actions</h2>
+            <p class="text-xs text-white/50 mt-1">
+              Anyone can call <code class="text-white/80">lock()</code> after settlement time, then <code class="text-white/80">settle()</code> to trigger the GenLayer consensus pipeline.
+            </p>
+          </div>
+          <div class="flex gap-2">
+            <button
+              id="lockBtn"
+              class="px-3 py-2 rounded-lg bg-yellow-500/20 hover:bg-yellow-500/30 text-yellow-300 text-sm font-semibold transition disabled:opacity-50"
+            >
+              lock()
+            </button>
+            <button
+              id="settleBtn"
+              class="px-3 py-2 rounded-lg bg-accent2/20 hover:bg-accent2/30 text-accent2 text-sm font-semibold transition disabled:opacity-50"
+            >
+              settle()
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <footer class="mt-10 text-center text-xs text-white/40">
+        Built on
+        <a class="hover:text-white/80" href="https://genlayer.com" target="_blank">GenLayer</a>
+        · Source on
+        <a class="hover:text-white/80" href="https://github.com/riyannode/world-oracle-hunt" target="_blank">GitHub</a>
+        · Verified on
+        <a id="verifyLink" class="hover:text-white/80" target="_blank">Bradbury Explorer</a>
+      </footer>
+    </main>
+
+    <script src="./genlayer.bundle.js"></script>
+    <script src="./app.js"></script>
+  </body>
+</html>
